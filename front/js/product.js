@@ -37,15 +37,34 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
       //Intégration des couleurs dans le HTML
       const idColor = document.getElementById("colors");
       idColor.innerHTML = valueColors
-    
+
+
+  //Selectionner le bouton du panier
+  const btnSendCart = document.querySelector("#addToCart");
+  console.log(btnSendCart);
+
+  //Ecouter le bouton et envoyer la panier
+  btnSendCart.addEventListener("click",(e)=>{
+    e.preventDefault();
+
+    //Mettre le choix de l'utilisateur dans une variable
+  const choiceForm = idColor.value;
+
+    //Récupération des valeurs du formulaire
+  let optionsProducts = {
+    id: products._id,
+    name: products.name,
+    image: products.imageUrl,
+    optionProduct: choiceForm,
+    quantite:1,
+    price:products.price
+  }
+  console.log(optionsProducts);
+  });
+
   })
-  .catch((error) => {
+  .catch(() => {
     let productsArticle = document.getElementsByClassName('item');
     productsArticle.innerHTML =
       "Nous n'avons pas réussi à afficher notre produit. Avez vous bien lancé le serveur local (Port 3000) ? <br>Si le problème persiste, contactez-nous.";
   })
-
-
-  //Choisir une option du produit
-  const idForm = document.getElementById("colors");
-  console.log(idForm);
