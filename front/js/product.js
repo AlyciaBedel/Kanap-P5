@@ -47,16 +47,20 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
   btnSendCart.addEventListener("click",(e)=>{
     e.preventDefault();
 
+    //Récupération de la quantité
+    const idQuantity = document.getElementById("quantity");
+
     //Mettre le choix de l'utilisateur dans une variable
-  const choiceForm = idColor.value;
+  const choiceColorForm = idColor.value;
+  const choiceQuantityForm = idQuantity.value;
 
     //Récupération des valeurs du formulaire
   let optionsProducts = {
     id: products._id,
     name: products.name,
     image: products.imageUrl,
-    optionProduct: choiceForm,
-    quantite:1,
+    optionProduct: choiceColorForm,
+    quantite:choiceQuantityForm,
     price:products.price
   }
   console.log(optionsProducts);
