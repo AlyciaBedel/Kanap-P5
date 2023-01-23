@@ -38,7 +38,7 @@ if(productSaveLocalStorage === null) {
                   <div class="cart__item__content__settings">
                     <div class="cart__item__content__settings__quantity">
                       <p>Qté : </p>
-                      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="42">
+                      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productSaveLocalStorage[i].quantite}">
                     </div>
                     <div class="cart__item__content__settings__delete">
                       <p class="deleteItem">Supprimer</p>
