@@ -166,10 +166,43 @@ btnSendForm.addEventListener('click', (e) => {
     email: document.querySelector('#email').value,
   };
 
-  
+  //--------------- Gestion de la validation du formulaire
+  const textAlert = (value) => {
+    return `${value}: Chiffre et symbole ne sont pas autorisé \n Ne pas dépasser 20 caractères, minimum 3 caractères`;
+  };
 
-  //Mettre l'objet formValue dans le local storage
-  localStorage.setItem('formValues', JSON.stringify(formValues));
+  const regExFirstLastName = (value) => {
+    return /^[A-Za-z]{3,20}$/.test(value);
+  };
+
+  //Contrôle de la validité du prénom
+  function firstNameControle() {
+    const firstName = formValues.firstName;
+    if (regExFirstLastName(firstName)) {
+      return true;
+    } else {
+      alert(textAlert('Prénom'));
+      return false;
+    }
+  }
+
+  //Contrôle de la validité du nom
+  function lastNameControle() {
+    const lastName = formValues.lastName;
+    if (regExFirstLastName(lastName)) {
+      return true;
+    } else {
+      alert(textAlert('Nom'));
+      return false;
+    }
+  }
+
+  if (firstNameControle() && lastNameControle()) {
+    //Mettre l'objet formValue dans le local storage
+    localStorage.setItem('formValues', JSON.stringify(formValues));
+  } else {
+    alert('Veuillez bien remplir le formulaire');
+  }
 
   //Mettre les values du formulaire et mettre les produits sélectionnés dans un objet à envoyer vers le serveur
   const sendForm = {
@@ -182,18 +215,17 @@ btnSendForm.addEventListener('click', (e) => {
 
 //--------------- Mettre le contenu du localstorage dans les champs du formulaire
 //Prendre la key dans le localStorage et la mettre dans une variable
-const dataLocalStorage = localStorage.getItem("formValues");
-console.log(dataLocalStorage);
+const dataLocalStorage = localStorage.getItem('formValues');
 
-const dataLocalStorageObjet = JSON.parse(dataLocalStorage)
+const dataLocalStorageObjet = JSON.parse(dataLocalStorage);
 
 //Fonction pour que le champs du formulaire soit rempli par les données du local storage
-function fullFormLocalStorage (input){
+function fullFormLocalStorage(input) {
   document.querySelector(`#${input}`).value = dataLocalStorageObjet[input];
 }
 
-fullFormLocalStorage("firstName");
-fullFormLocalStorage("lastName");
-fullFormLocalStorage("address");
-fullFormLocalStorage("city");
-fullFormLocalStorage("email");
+fullFormLocalStorage('firstName');
+fullFormLocalStorage('lastName');
+fullFormLocalStorage('address');
+fullFormLocalStorage('city');
+fullFormLocalStorage('email');
