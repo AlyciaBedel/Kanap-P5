@@ -34,7 +34,9 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
     colors.forEach(
       (colors) =>
         (valueColors =
-          valueColors + `<option value="${colors}">${colors}</option>`)
+          valueColors +
+          `
+          <option value="${colors}">${colors}</option>`)
     );
 
     //Intégration des couleurs dans le HTML
@@ -64,7 +66,7 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
         imageAlt: products.altTxt,
         optionProduct: choiceColorForm,
         quantite: choiceQuantityForm,
-        price: products.price,
+        price: products.price * choiceQuantityForm,
       };
 
       //-----------------------------------------------LOCAL STORAGE-----------------------------------------------//

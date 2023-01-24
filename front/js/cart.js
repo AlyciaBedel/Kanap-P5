@@ -115,7 +115,7 @@ const displayStructureForm = () => {
                 <div class="cart__order__form__question">
                   <label for="firstName">Prénom: </label>
                   <input type="text" name="firstName" id="firstName" required>
-                  <p id="firstNameErrorMsg">ci est un message d'erreur</p>
+                  <p id="firstNameErrorMsg"></p>
                 </div>
                 <div class="cart__order__form__question">
                   <label for="lastName">Nom: </label>
@@ -167,37 +167,102 @@ btnSendForm.addEventListener('click', (e) => {
   };
 
   //--------------- Gestion de la validation du formulaire
-  const textAlert = (value) => {
-    return `${value}: Chiffre et symbole ne sont pas autorisé \n Ne pas dépasser 20 caractères, minimum 3 caractères`;
+  //RegEx pour nom + prénom
+  const regExFirstLastName = (value) => {
+    return /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/.test(
+      value
+    );
   };
 
-  const regExFirstLastName = (value) => {
-    return /^[A-Za-z]{3,20}$/.test(value);
+  //RegEx pour l'e-mail
+  const regExEmail = (value) => {
+    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value);
   };
+
+  //RegEx pour l'adresse
+  const regExAddressCity = (value) => {
+    return /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/.test(
+      value
+    );
+  };
+
+  //Fonction messages d'erreurs
+  function dataInputMissingEmpty(querySelectorId) {
+    document.querySelector(`#${querySelectorId}`).textContent = '';
+  }
 
   //Contrôle de la validité du prénom
-  function firstNameControle() {
+  function firstNameControl() {
     const firstName = formValues.firstName;
     if (regExFirstLastName(firstName)) {
+      dataInputMissingEmpty('firstNameErrorMsg');
       return true;
     } else {
-      alert(textAlert('Prénom'));
+      document.querySelector('#firstNameErrorMsg').textContent =
+        'Chiffre et symbole ne sont pas autorisé. Ne pas dépasser 20 caractères, minimum 3 caractères';
       return false;
     }
   }
 
   //Contrôle de la validité du nom
-  function lastNameControle() {
+  function lastNameControl() {
     const lastName = formValues.lastName;
     if (regExFirstLastName(lastName)) {
+      dataInputMissingEmpty('lastNameErrorMsg');
       return true;
     } else {
-      alert(textAlert('Nom'));
+      document.querySelector('#lastNameErrorMsg').textContent =
+        'Chiffre et symbole ne sont pas autorisé. Ne pas dépasser 20 caractères, minimum 3 caractères';
       return false;
     }
   }
 
-  if (firstNameControle() && lastNameControle()) {
+  //Contrôle de la validité de l'adresse
+  function addressControl() {
+    const address = formValues.address;
+    if (regExAddressCity(address)) {
+      dataInputMissingEmpty('addressErrorMsg');
+      return true;
+    } else {
+      document.querySelector('#addressErrorMsg').textContent =
+        "L'adresse doit contenir que des lettres et des chiffres";
+      return false;
+    }
+  }
+
+  //Contrôle de la validité de la ville
+  function cityControl() {
+    const city = formValues.city;
+    if (regExAddressCity(city)) {
+      dataInputMissingEmpty('cityErrorMsg');
+      return true;
+    } else {
+      document.querySelector('#cityErrorMsg').textContent =
+        'Les symboles ne sont pas autorisé.';
+      return false;
+    }
+  }
+
+  //Contrôle de la validité de l'email
+  function emailControl() {
+    const email = formValues.email;
+    if (regExEmail(email)) {
+      dataInputMissingEmpty('emailErrorMsg');
+      return true;
+    } else {
+      document.querySelector('#emailErrorMsg').textContent =
+        "L'e-mail n'est pas valide";
+      return false;
+    }
+  }
+
+  if (
+    firstNameControl() &&
+    lastNameControl() &&
+    addressControl() &&
+    cityControl() &&
+    emailControl()
+  ) {
     //Mettre l'objet formValue dans le local storage
     localStorage.setItem('formValues', JSON.stringify(formValues));
   } else {
@@ -211,6 +276,35 @@ btnSendForm.addEventListener('click', (e) => {
   };
 
   //Envoi de l'objet form vers le serveur
+  const promiseAPI = fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    body: JSON.stringify(sendForm),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  //Pour voir le résultat du serveur dans la console
+  promiseAPI.then(async (response) => {
+    try {
+      const content = await response.json();
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  //Pour voir ce qu'il y a réellement sur le serveur
+  const viewServer = fetch('http://localhost:3000/api/products/order');
+  viewServer.then(async (response) => {
+    try {
+      console.log(viewServer);
+
+      const dataOnServer = await response.json();
+      console.log(dataOnServer);
+    } catch (e) {
+      console.log(e);
+    }
+  });
 });
 
 //--------------- Mettre le contenu du localstorage dans les champs du formulaire
@@ -221,7 +315,11 @@ const dataLocalStorageObjet = JSON.parse(dataLocalStorage);
 
 //Fonction pour que le champs du formulaire soit rempli par les données du local storage
 function fullFormLocalStorage(input) {
-  document.querySelector(`#${input}`).value = dataLocalStorageObjet[input];
+  if (dataLocalStorageObjet == null) {
+    console.log('Le local storage a pour valeur null');
+  } else {
+    document.querySelector(`#${input}`).value = dataLocalStorageObjet[input];
+  }
 }
 
 fullFormLocalStorage('firstName');
