@@ -74,6 +74,18 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
       //Déclaration de la variable "productSaveLocalStorage" dans laquelle on met les key et les values qui sont dans le local storage
       let productSaveLocalStorage = JSON.parse(localStorage.getItem('product'));
 
+      //Fonction pop up pour aller au panier ou revenir à l'accueil
+      const popUpConfirmation = () => {
+        if (
+          window.confirm(`${products.name} avec l'option : ${choiceColorForm} a bien été ajouté au panier
+        Consultez le panier OK ou revenir à l'accueil ANNULER`)
+        ) {
+          window.location.href = 'cart.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      };
+
       //Fonction ajouter un produit dans le local storage
       const addProductLocalStorage = () => {
         //Ajout dans le tableau de l'objet avec les values choisi par l'utilisateur
@@ -89,11 +101,13 @@ let response = fetch(`http://localhost:3000/api/products/${id}`)
       //S'il y a déjà des produits d'enregistré dans le local storage
       if (productSaveLocalStorage) {
         addProductLocalStorage();
+        popUpConfirmation();
       }
       //S'il n'y a pas de produit d'enregistré dans le local storage
       else {
         productSaveLocalStorage = [];
         addProductLocalStorage();
+        popUpConfirmation();
       }
     });
   })

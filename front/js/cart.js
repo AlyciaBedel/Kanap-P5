@@ -55,54 +55,67 @@ if (productSaveLocalStorage === null || productSaveLocalStorage == 0) {
 }
 
 //--------------- Gestion du bouton supprimer l'article
-//Sélection des références de tous les boutons supprimer dans le panier
-let btnDelete = document.querySelectorAll('.deleteItem');
+function deleteProduct() {
+  //Sélection des références de tous les boutons supprimer dans le panier
+  let btnDelete = document.querySelectorAll('.deleteItem');
 
-for (let j = 0; j < btnDelete.length; j++) {
-  btnDelete[j].addEventListener('click', (e) => {
-    e.preventDefault();
+  for (let j = 0; j < btnDelete.length; j++) {
+    btnDelete[j].addEventListener('click', (e) => {
+      e.preventDefault();
 
-    //Selectionner de l'id du produit qui va être supprimer en cliquant sur le bouton
-    let idSelectDelete = productSaveLocalStorage[j].id;
+      //Selectionner de l'id du produit qui va être supprimer en cliquant sur le bouton
+      let idSelectDelete = productSaveLocalStorage[j].id;
 
-    //Avec la méthode filter je sélectionne les éléments à garder et je supprime le bouton supprimé activé
-    productSaveLocalStorage = productSaveLocalStorage.filter(
-      (el) => el.id !== idSelectDelete
-    );
+      //Avec la méthode filter je sélectionne les éléments à garder et je supprime le bouton supprimé activé
+      productSaveLocalStorage = productSaveLocalStorage.filter(
+        (el) => el.id !== idSelectDelete
+      );
 
-    //On envoie la variable dans le localstorage
-    //La transformation en format JSON et l'envoyer dans la key "product" du local storage
-    localStorage.setItem('product', JSON.stringify(productSaveLocalStorage));
+      //On envoie la variable dans le localstorage
+      //La transformation en format JSON et l'envoyer dans la key "product" du local storage
+      localStorage.setItem('product', JSON.stringify(productSaveLocalStorage));
 
-    //Rechargement de la page
-    window.location.href = 'cart.html';
-  });
+      //Rechargement de la page
+      window.location.href = 'cart.html';
+    });
+  }
 }
+deleteProduct();
 
 //--------------- Montant total du panier
-//Déclaration de la variable pour pouvoir y mettre les prix qui sont présent dans le panier
-let priceTotalCalculation = [];
+function getTotal() {
+  //Déclaration de la variable pour pouvoir y mettre les prix qui sont présent dans le panier
+  let priceTotalCalculation = [];
+  let quantityTotalCalculation = [];
 
-//Aller chercher les prix dans le panier
-for (let k = 0; k < productSaveLocalStorage.length; k++) {
-  let priceProductCart = productSaveLocalStorage[k].price;
+  //Aller chercher les prix dans le panier
+  for (let k = 0; k < productSaveLocalStorage.length; k++) {
+    let priceProductCart = productSaveLocalStorage[k].price;
+    let quantityProductCart = productSaveLocalStorage[k].quantite;
 
-  //Mettre les prix du panier dans la variable priceTotal
-  priceTotalCalculation.push(priceProductCart);
-}
+    //Mettre les prix du panier dans la variable priceTotal
+    priceTotalCalculation.push(priceProductCart);
+    quantityTotalCalculation.push(quantityProductCart);
+  }
 
-//Additionner les prix qu'il y a dans le tableau de la variable priceTotal avec la méthode .reduce
-const reducer = (accumulator, currentValue) => accumulator + currentValue;
-const priceTotal = priceTotalCalculation.reduce(reducer, 0);
+  //Additionner les prix qu'il y a dans le tableau de la variable priceTotal avec la méthode .reduce
+  const reducer = (accumulator, currentValue) => accumulator + currentValue;
+  const priceTotal = priceTotalCalculation.reduce(reducer, 0);
 
-//Afficher le prix total en HTML
-const displayPriceTotal = `
+  const reducerQuantity = (accumulator, currentValue) =>
+    accumulator + currentValue;
+  const quantityTotal = quantityTotalCalculation.reduce(reducerQuantity, 0);
+
+  //Afficher le prix total en HTML
+  const displayPriceTotal = `
         <div class="cart__price">
-            <p>Total (<span id="totalQuantity">2</span> articles) : <span id="totalPrice">${priceTotal}</span> €</p>
+            <p>Total (<span id="totalQuantity">${quantityTotal}</span> articles) : <span id="totalPrice">${priceTotal}</span> €</p>
         </div>
         `;
 
-displayCart.insertAdjacentHTML('beforeend', displayPriceTotal);
+  displayCart.insertAdjacentHTML('beforeend', displayPriceTotal);
+}
+getTotal();
 
 //--------------- Formulaire de commande
 const displayStructureForm = () => {
@@ -265,46 +278,46 @@ btnSendForm.addEventListener('click', (e) => {
   ) {
     //Mettre l'objet formValue dans le local storage
     localStorage.setItem('formValues', JSON.stringify(formValues));
+
+    //Mettre les values du formulaire et mettre les produits sélectionnés dans un objet à envoyer vers le serveur
+    const sendForm = {
+      productSaveLocalStorage,
+      formValues,
+    };
+
+    //Envoi de l'objet form vers le serveur
+    const promiseAPI = fetch('http://localhost:3000/api/products/order', {
+      method: 'POST',
+      body: JSON.stringify(sendForm),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    //Pour voir le résultat du serveur dans la console
+    promiseAPI.then(async (response) => {
+      try {
+        const content = await response.json();
+      } catch (e) {
+        console.log(e);
+      }
+    });
+
+    //Pour voir ce qu'il y a réellement sur le serveur
+    const viewServer = fetch('http://localhost:3000/api/products/order');
+    viewServer.then(async (response) => {
+      try {
+        console.log(viewServer);
+
+        const dataOnServer = await response.json();
+        console.log(dataOnServer);
+      } catch (e) {
+        console.log(e);
+      }
+    });
   } else {
     alert('Veuillez bien remplir le formulaire');
   }
-
-  //Mettre les values du formulaire et mettre les produits sélectionnés dans un objet à envoyer vers le serveur
-  const sendForm = {
-    productSaveLocalStorage,
-    formValues,
-  };
-
-  //Envoi de l'objet form vers le serveur
-  const promiseAPI = fetch('http://localhost:3000/api/products/order', {
-    method: 'POST',
-    body: JSON.stringify(sendForm),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  //Pour voir le résultat du serveur dans la console
-  promiseAPI.then(async (response) => {
-    try {
-      const content = await response.json();
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  //Pour voir ce qu'il y a réellement sur le serveur
-  const viewServer = fetch('http://localhost:3000/api/products/order');
-  viewServer.then(async (response) => {
-    try {
-      console.log(viewServer);
-
-      const dataOnServer = await response.json();
-      console.log(dataOnServer);
-    } catch (e) {
-      console.log(e);
-    }
-  });
 });
 
 //--------------- Mettre le contenu du localstorage dans les champs du formulaire
