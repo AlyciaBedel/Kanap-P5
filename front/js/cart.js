@@ -1,3 +1,8 @@
+//Sélection du bouton commander
+const btnSendForm = document.getElementById('order');
+
+btnSendForm.addEventListener('click', (e) => submitForm(e));
+
 //Récupération des produits avec l'API
 fetch('http://localhost:3000/api/products')
   .then((res) => res.json())
@@ -5,7 +10,7 @@ fetch('http://localhost:3000/api/products')
     dataProductsCart(products);
   })
   .catch((error) => {
-    console.log(error);
+    console.log('Je suis une erreur de la requête GET', error);
   });
 
 //Fonction de récupération des informations dans l'API qui ne sont pas dans le local storage
@@ -101,7 +106,8 @@ function updateQuantityPrice() {
   const products = document.querySelectorAll('.cart__item');
   //Pour chaque élément, on ajoute un écouteur d'événement sur l'input
   products.forEach((product) => {
-    product.addEventListener('input', (event) => {
+    product.addEventListener('input', (e) => {
+      e.preventDefault();
       //Récupérer les informations du panier qui sont stocké dans le local storage
       const cart = JSON.parse(localStorage.getItem('product'));
       // Recherche l'élément HTML sur lequel l'événement a eu lieu en comparant l'id et color
@@ -109,11 +115,11 @@ function updateQuantityPrice() {
         (i) => i.id === product.dataset.id && i.color === product.dataset.color
       );
       // Mise à jour de quantité
-      item.quantity = Math.min(event.target.value, 100);
+      item.quantity = Math.min(e.target.value, 100);
       // Sauvegarde le panier dans le localStorage de nouveau
       localStorage.setItem('product', JSON.stringify(cart));
       // Mise à jour de quantité dans le html
-      product.dataset.quantity = event.target.value;
+      product.dataset.quantity = e.target.value;
       getTotal();
     });
   });
@@ -154,4 +160,177 @@ function removeFromCart() {
       getTotal();
     });
   });
+}
+
+function submitForm(e) {
+  e.preventDefault();
+
+  if (IsInvalidForm()) return;
+  if (IsEmailInvalid()) return;
+  if (IsLastNameInvalid()) return;
+  if (IsFirstNameInvalid()) return;
+
+  const body = requestBody();
+  fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+    .catch((error) => {
+      console.log('Je suis une erreur de la requête POST', error);
+    });
+}
+
+function IsInvalidForm() {
+  const displayFormCart = document.querySelector('.cart');
+  const inputs = displayFormCart.querySelectorAll('input');
+  inputs.forEach((input) => {
+    if (input.value === '') {
+      alert('Merci de remplir tous les champs du formulaire');
+      return true;
+    } else {
+      return false;
+    }
+  });
+}
+
+function requestBody() {
+  //Récupération des valeurs du formulaire
+  const cart = JSON.parse(localStorage.getItem('product'));
+  const firstName = document.querySelector('#firstName').value;
+  const lastName = document.querySelector('#lastName').value;
+  const address = document.querySelector('#address').value;
+  const city = document.querySelector('#city').value;
+  const email = document.querySelector('#email').value;
+
+  // if (cart !== null && [firstName, lastName, address, city, email] !== '') {
+  // Récupération des id(s) Produits du Panier
+  const productsIds = [];
+  cart.forEach((optionProduct) => {
+    productsIds.push(optionProduct.id);
+  });
+
+  const form = {
+    contact: {
+      firstName: firstName,
+      lastName: lastName,
+      address: address,
+      city: city,
+      email: email,
+    },
+    products: [productsIds],
+  };
+  console.log(form);
+  return form;
+  // } else {
+  //   alert('Veuillez bien remplir le formulaire et d'avoir un produit dans votre panier');
+  //   e.preventDefault();
+  // }
+}
+
+//Fonction Prénom pour vérifier la validité du champs avec message d'erreur
+function IsFirstNameInvalid() {
+  const firstNameInput = document.getElementById('firstName');
+  const firstNameValue = document.getElementById('firstName').value;
+  const firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
+  const regex =
+    /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/;
+
+  if (regex.test(firstNameValue) == false) {
+    firstNameInput.style.backgroundColor = 'red';
+    firstNameInput.style.color = 'white';
+    firstNameErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
+                                  - "Prénom" ne doit comporter que des lettres<br>
+                                  - Tirets et accents sont autorisés`;
+    firstNameErrorMsg.style.display = 'inherit';
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//Fonction Nom pour vérifier la validité du champs avec message d'erreur
+function IsLastNameInvalid() {
+  const lastNameInput = document.getElementById('lastName');
+  const lastNameValue = document.getElementById('lastName').value;
+  const lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
+  const regex =
+    /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/;
+
+  if (regex.test(lastNameValue) == false) {
+    lastNameInput.style.backgroundColor = 'red';
+    lastNameInput.style.color = 'white';
+    lastNameErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
+                                  - "Prénom" ne doit comporter que des lettres<br>
+                                  - Tirets et accents sont autorisés`;
+    lastNameErrorMsg.style.display = 'inherit';
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//Fonction Adresse pour vérifier la validité du champs avec message d'erreur
+function IsAddressInvalid() {
+  const addressInput = document.getElementById('address');
+  const addressValue = document.getElementById('address').value;
+  const addressErrorMsg = document.getElementById('addressErrorMsg');
+  const regex =
+    /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/;
+
+  if (regex.test(addressValue) == false) {
+    addressInput.style.backgroundColor = 'red';
+    addressInput.style.color = 'white';
+    addressErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
+                                  - "Prénom" ne doit comporter que des lettres<br>
+                                  - Tirets et accents sont autorisés`;
+    addressErrorMsg.style.display = 'inherit';
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//Fonction Ville pour vérifier la validité du champs avec message d'erreur
+function IsCityInvalid() {
+  const cityInput = document.getElementById('city');
+  const cityValue = document.getElementById('city').value;
+  const cityErrorMsg = document.getElementById('cityErrorMsg');
+  const regex =
+    /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/;
+
+  if (regex.test(cityInput) == false) {
+    cityInput.style.backgroundColor = 'red';
+    cityInput.style.color = 'white';
+    cityErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
+                                  - "Prénom" ne doit comporter que des lettres<br>
+                                  - Tirets et accents sont autorisés`;
+    cityErrorMsg.style.display = 'inherit';
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//Fonction Email pour vérifier la validité du champs avec message d'erreur
+function IsEmailInvalid() {
+  const emailInput = document.getElementById('email');
+  const emailValue = document.getElementById('email').value;
+  const emailErrorMsg = document.getElementById('emailErrorMsg');
+  const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+  if (regex.test(emailValue) == false) {
+    emailInput.style.backgroundColor = 'red';
+    emailInput.style.color = 'white';
+    emailErrorMsg.innerHTML = `L'email n'est pas valide :<br>
+                                    example@kanap.com`;
+    emailErrorMsg.style.display = 'inherit';
+    return false;
+  } else {
+    return true;
+  }
 }
