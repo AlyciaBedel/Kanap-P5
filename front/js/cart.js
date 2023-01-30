@@ -1,342 +1,157 @@
-//Déclaration de la variable "productSaveLocalStorage" + JSON Parse pour convertir les données au format JSON
-let productSaveLocalStorage = JSON.parse(localStorage.getItem('product'));
+//Récupération des produits avec l'API
+fetch('http://localhost:3000/api/products')
+  .then((res) => res.json())
+  .then((products) => {
+    dataProductsCart(products);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
-//--------------- Affichage des produits du panier
-//Selection de la classe ou je vais injecter le code html
-const displayCart = document.querySelector('.cart');
+//Fonction de récupération des informations dans l'API qui ne sont pas dans le local storage
+function dataProductsCart(products) {
+  // On récupérer le panier du Local Storage et on le passe en JSON
+  const cart = JSON.parse(localStorage.getItem('product'));
 
-//Si le panier est vide : afficher le panier est vide
-if (productSaveLocalStorage === null || productSaveLocalStorage == 0) {
-  const cartEmpty = `
-    <div>
-    <p>Le panier est vide</p>
-    </div>
-    `;
-  displayCart.innerHTML = cartEmpty;
-} else {
-  //Si le panier n'est pas vide : afficher les produits dans le localStorage
-  let structureProductCart = [];
+  //On vérifie si le panier n'est pas vide
+  if (cart) {
+    //On va faire une boucle sur chaque produit du panier
+    for (let purchaseProduct of cart) {
+      for (let i = 0; i < products.length; i++) {
+        // On vérifie si l'id dans le local Storage est égale à l'id de l'API
+        if (purchaseProduct.id === products[i]._id) {
+          //On met à jour les données récupérer
+          purchaseProduct.name = products[i].name;
+          purchaseProduct.price = products[i].price;
+          purchaseProduct.imageUrl = products[i].imageUrl;
+          purchaseProduct.altTxt = products[i].altTxt;
+          purchaseProduct.description = products[i].description;
+        }
+      }
+    }
+    displayCart(cart);
+  } else {
+    document.querySelector('#totalQuantity').innerHTML = '0';
+    document.querySelector('#totalPrice').innerHTML = '0';
+    document.querySelector('h1').innerHTML = 'Votre panier est vide';
+  }
+}
 
-  //Afficher les produits dans le panier selon le code HTML
-  for (i = 0; i < productSaveLocalStorage.length; i++) {
-    structureProductCart =
-      structureProductCart +
-      `
-        <section id="cart__items">
-              <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
-                <div class="cart__item__img">
-                  <img src="${productSaveLocalStorage[i].image}" alt="${productSaveLocalStorage[i].imageAlt}">
+//Fonction pour afficher le panier
+function displayCart(cart) {
+  const cartContainer = document.querySelector('#cart__items');
+  // Création des éléments et injections dans le HTML
+  cartContainer.innerHTML += cart
+    .map(
+      (purchaseProduct) =>
+        `<article class="cart__item" data-id="${purchaseProduct.id}" data-color="${purchaseProduct.color}" data-quantity="${purchaseProduct.quantity}" data-price="${purchaseProduct.price}"> 
+            <div class="cart__item__img">
+                <img src="${purchaseProduct.imageUrl}" alt="${purchaseProduct.altTxt}">
+            </div>
+            <div class="cart__item__content">
+                <div class="cart__item__content__description">
+                    <h2>${purchaseProduct.name}</h2>
+                    <span>Couleur : ${purchaseProduct.color}</span>
+                    <p data-price="${purchaseProduct.price}">Prix : ${purchaseProduct.price} €</p>
                 </div>
-                <div class="cart__item__content">
-                  <div class="cart__item__content__description">
-                    <h2>${productSaveLocalStorage[i].name}</h2>
-                    <p>${productSaveLocalStorage[i].optionProduct}</p>
-                    <p>${productSaveLocalStorage[i].price} €</p>
-                  </div>
-                  <div class="cart__item__content__settings">
+                <div class="cart__item__content__settings">
                     <div class="cart__item__content__settings__quantity">
-                      <p>Qté : </p>
-                      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productSaveLocalStorage[i].quantite}">
+                        <p>Quantité : </p>
+                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${purchaseProduct.quantity}">
                     </div>
                     <div class="cart__item__content__settings__delete">
-                      <p class="deleteItem">Supprimer</p>
+                    <p class="deleteItem" data-id="${purchaseProduct.id}" data-color="${purchaseProduct.color}">Supprimer</p>
                     </div>
-                  </div>
                 </div>
-              </article>
-            </section>
-        `;
-  }
+            </div>
+        </article>`
+    )
+    .join('');
 
-  if (i == productSaveLocalStorage.length) {
-    //Injection html dans le panier
-    displayCart.innerHTML = structureProductCart;
-  }
+  //Appelle des différentes fonctions
+  getTotal();
+  updateQuantityPrice();
+  removeFromCart();
 }
 
-//--------------- Gestion du bouton supprimer l'article
-function deleteProduct() {
-  //Sélection des références de tous les boutons supprimer dans le panier
-  let btnDelete = document.querySelectorAll('.deleteItem');
+//Fonction pour calculer le total du panier + de la quantité
+function getTotal() {
+  const containerCart = document.querySelectorAll('.cart__item');
 
-  for (let j = 0; j < btnDelete.length; j++) {
-    btnDelete[j].addEventListener('click', (e) => {
-      e.preventDefault();
+  // On va utiliser Array.from pour convertir la NodeList en tableau
+  // et Array.reduce pour calculer la quantité totale des produits et le prix du panier
+  const { totalQuantity, totalPrice } = Array.from(containerCart).reduce(
+    (acc, purchaseProduct) => {
+      // On ajoute la quantité de chaque produit du panier
+      acc.totalQuantity += JSON.parse(purchaseProduct.dataset.quantity);
+      // On ajoute le prix total de chaque produit du panier
+      acc.totalPrice +=
+        purchaseProduct.dataset.quantity * purchaseProduct.dataset.price;
+      return acc;
+    },
+    { totalQuantity: 0, totalPrice: 0 }
+  );
+  //On l'injecte dans le html
+  document.getElementById('totalQuantity').textContent = totalQuantity;
+  document.getElementById('totalPrice').textContent = totalPrice;
+}
 
-      //Selectionner de l'id du produit qui va être supprimer en cliquant sur le bouton
-      let idSelectDelete = productSaveLocalStorage[j].id;
+//Fonction pour modifier la quantité et le prix
+function updateQuantityPrice() {
+  const products = document.querySelectorAll('.cart__item');
+  //Pour chaque élément, on ajoute un écouteur d'événement sur l'input
+  products.forEach((product) => {
+    product.addEventListener('input', (event) => {
+      //Récupérer les informations du panier qui sont stocké dans le local storage
+      const cart = JSON.parse(localStorage.getItem('product'));
+      // Recherche l'élément HTML sur lequel l'événement a eu lieu en comparant l'id et color
+      const item = cart.find(
+        (i) => i.id === product.dataset.id && i.color === product.dataset.color
+      );
+      // Mise à jour de quantité
+      item.quantity = Math.min(event.target.value, 100);
+      // Sauvegarde le panier dans le localStorage de nouveau
+      localStorage.setItem('product', JSON.stringify(cart));
+      // Mise à jour de quantité dans le html
+      product.dataset.quantity = event.target.value;
+      getTotal();
+    });
+  });
+}
 
-      //Avec la méthode filter je sélectionne les éléments à garder et je supprime le bouton supprimé activé
-      productSaveLocalStorage = productSaveLocalStorage.filter(
-        (el) => el.id !== idSelectDelete
+//Fonction pour supprimer un élément du panier
+function removeFromCart() {
+  const deleteButtons = document.querySelectorAll('.cart__item .deleteItem');
+  // On fait une boucle sur tous les boutons de suppression en écoutant l'événement au clique
+  deleteButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      // Récupérer les produits du panier dans le Local Storage et en les mettant en JSON
+      const cart = JSON.parse(localStorage.getItem('product'));
+      // Filtre le panier pour supprimer le produit sur le bouton cliquer
+      const updatedCart = cart.filter(
+        (item) =>
+          item.id !== button.dataset.id && item.color !== button.dataset.color
+      );
+      // Enregistrer le panier mis à jour dans le Local Storage
+      localStorage.setItem('product', JSON.stringify(updatedCart));
+
+      // Trouve le produit du panier qui correspond au bouton sur lequel clique
+      const productToDelete = document.querySelector(
+        `.cart__item[data-id="${button.dataset.id}"][data-color="${button.dataset.color}"]`
       );
 
-      //On envoie la variable dans le localstorage
-      //La transformation en format JSON et l'envoyer dans la key "product" du local storage
-      localStorage.setItem('product', JSON.stringify(productSaveLocalStorage));
+      // Supprime le produit du panier
+      productToDelete.remove();
 
-      //Rechargement de la page
-      window.location.href = 'cart.html';
-    });
-  }
-}
-deleteProduct();
+      if (updatedCart.length === 0) {
+        //Nettoyer le local storage
+        localStorage.clear();
 
-//--------------- Montant total du panier
-function getTotal() {
-  //Déclaration de la variable pour pouvoir y mettre les prix qui sont présent dans le panier
-  let priceTotalCalculation = [];
-  let quantityTotalCalculation = [];
-
-  //Aller chercher les prix dans le panier
-  for (let k = 0; k < productSaveLocalStorage.length; k++) {
-    let priceProductCart = productSaveLocalStorage[k].price;
-    let quantityProductCart = productSaveLocalStorage[k].quantite;
-
-    //Mettre les prix du panier dans la variable priceTotal
-    priceTotalCalculation.push(priceProductCart);
-    quantityTotalCalculation.push(quantityProductCart);
-  }
-
-  //Additionner les prix qu'il y a dans le tableau de la variable priceTotal avec la méthode .reduce
-  const reducer = (accumulator, currentValue) => accumulator + currentValue;
-  const priceTotal = priceTotalCalculation.reduce(reducer, 0);
-
-  const reducerQuantity = (accumulator, currentValue) =>
-    accumulator + currentValue;
-  const quantityTotal = quantityTotalCalculation.reduce(reducerQuantity, 0);
-
-  //Afficher le prix total en HTML
-  const displayPriceTotal = `
-        <div class="cart__price">
-            <p>Total (<span id="totalQuantity">${quantityTotal}</span> articles) : <span id="totalPrice">${priceTotal}</span> €</p>
-        </div>
-        `;
-
-  displayCart.insertAdjacentHTML('beforeend', displayPriceTotal);
-}
-getTotal();
-
-//--------------- Formulaire de commande
-const displayStructureForm = () => {
-  //Sélection de l'élément dans le DOM pour le positionnement du formulaire
-  const displayFormCart = document.querySelector('.cart');
-
-  const structureForm = `
-  <div class="cart__order">
-              <form method="get" class="cart__order__form">
-                <div class="cart__order__form__question">
-                  <label for="firstName">Prénom: </label>
-                  <input type="text" name="firstName" id="firstName" required>
-                  <p id="firstNameErrorMsg"></p>
-                </div>
-                <div class="cart__order__form__question">
-                  <label for="lastName">Nom: </label>
-                  <input type="text" name="lastName" id="lastName" required>
-                  <p id="lastNameErrorMsg"></p>
-                </div>
-                <div class="cart__order__form__question">
-                  <label for="address">Adresse: </label>
-                  <input type="text" name="address" id="address" required>
-                  <p id="addressErrorMsg"></p>
-                </div>
-                <div class="cart__order__form__question">
-                  <label for="city">Ville: </label>
-                  <input type="text" name="city" id="city" required>
-                  <p id="cityErrorMsg"></p>
-                </div>
-                <div class="cart__order__form__question">
-                  <label for="email">Email: </label>
-                  <input type="email" name="email" id="email" required>
-                  <p id="emailErrorMsg"></p>
-                </div>
-                <div class="cart__order__form__submit">
-                  <input type="submit" value="Commander !" id="order">
-                </div>
-              </form>
-            </div>
-  `;
-
-  displayFormCart.insertAdjacentHTML('afterend', structureForm);
-};
-
-//Affichage du formulaire
-displayStructureForm();
-
-//Sélection du bouton commander
-const btnSendForm = document.getElementById('order');
-
-//addEventListener
-btnSendForm.addEventListener('click', (e) => {
-  e.preventDefault();
-
-  //Récupération des valeurs du formulaire
-  const formValues = {
-    firstName: document.querySelector('#firstName').value,
-    lastName: document.querySelector('#lastName').value,
-    address: document.querySelector('#address').value,
-    city: document.querySelector('#city').value,
-    email: document.querySelector('#email').value,
-  };
-
-  //--------------- Gestion de la validation du formulaire
-  //RegEx pour nom + prénom
-  const regExFirstLastName = (value) => {
-    return /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/.test(
-      value
-    );
-  };
-
-  //RegEx pour l'e-mail
-  const regExEmail = (value) => {
-    return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value);
-  };
-
-  //RegEx pour l'adresse
-  const regExAddressCity = (value) => {
-    return /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/.test(
-      value
-    );
-  };
-
-  //Fonction messages d'erreurs
-  function dataInputMissingEmpty(querySelectorId) {
-    document.querySelector(`#${querySelectorId}`).textContent = '';
-  }
-
-  //Contrôle de la validité du prénom
-  function firstNameControl() {
-    const firstName = formValues.firstName;
-    if (regExFirstLastName(firstName)) {
-      dataInputMissingEmpty('firstNameErrorMsg');
-      return true;
-    } else {
-      document.querySelector('#firstNameErrorMsg').textContent =
-        'Chiffre et symbole ne sont pas autorisé. Ne pas dépasser 20 caractères, minimum 3 caractères';
-      return false;
-    }
-  }
-
-  //Contrôle de la validité du nom
-  function lastNameControl() {
-    const lastName = formValues.lastName;
-    if (regExFirstLastName(lastName)) {
-      dataInputMissingEmpty('lastNameErrorMsg');
-      return true;
-    } else {
-      document.querySelector('#lastNameErrorMsg').textContent =
-        'Chiffre et symbole ne sont pas autorisé. Ne pas dépasser 20 caractères, minimum 3 caractères';
-      return false;
-    }
-  }
-
-  //Contrôle de la validité de l'adresse
-  function addressControl() {
-    const address = formValues.address;
-    if (regExAddressCity(address)) {
-      dataInputMissingEmpty('addressErrorMsg');
-      return true;
-    } else {
-      document.querySelector('#addressErrorMsg').textContent =
-        "L'adresse doit contenir que des lettres et des chiffres";
-      return false;
-    }
-  }
-
-  //Contrôle de la validité de la ville
-  function cityControl() {
-    const city = formValues.city;
-    if (regExAddressCity(city)) {
-      dataInputMissingEmpty('cityErrorMsg');
-      return true;
-    } else {
-      document.querySelector('#cityErrorMsg').textContent =
-        'Les symboles ne sont pas autorisé.';
-      return false;
-    }
-  }
-
-  //Contrôle de la validité de l'email
-  function emailControl() {
-    const email = formValues.email;
-    if (regExEmail(email)) {
-      dataInputMissingEmpty('emailErrorMsg');
-      return true;
-    } else {
-      document.querySelector('#emailErrorMsg').textContent =
-        "L'e-mail n'est pas valide";
-      return false;
-    }
-  }
-
-  if (
-    firstNameControl() &&
-    lastNameControl() &&
-    addressControl() &&
-    cityControl() &&
-    emailControl()
-  ) {
-    //Mettre l'objet formValue dans le local storage
-    localStorage.setItem('formValues', JSON.stringify(formValues));
-
-    //Mettre les values du formulaire et mettre les produits sélectionnés dans un objet à envoyer vers le serveur
-    const sendForm = {
-      productSaveLocalStorage,
-      formValues,
-    };
-
-    //Envoi de l'objet form vers le serveur
-    const promiseAPI = fetch('http://localhost:3000/api/products/order', {
-      method: 'POST',
-      body: JSON.stringify(sendForm),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    //Pour voir le résultat du serveur dans la console
-    promiseAPI.then(async (response) => {
-      try {
-        const content = await response.json();
-      } catch (e) {
-        console.log(e);
+        document.querySelector('#totalQuantity').innerHTML = '0';
+        document.querySelector('#totalPrice').innerHTML = '0';
+        document.querySelector('h1').innerHTML = 'Votre panier est vide';
       }
+      getTotal();
     });
-
-    //Pour voir ce qu'il y a réellement sur le serveur
-    const viewServer = fetch('http://localhost:3000/api/products/order');
-    viewServer.then(async (response) => {
-      try {
-        console.log(viewServer);
-
-        const dataOnServer = await response.json();
-        console.log(dataOnServer);
-      } catch (e) {
-        console.log(e);
-      }
-    });
-  } else {
-    alert('Veuillez bien remplir le formulaire');
-  }
-});
-
-//--------------- Mettre le contenu du localstorage dans les champs du formulaire
-//Prendre la key dans le localStorage et la mettre dans une variable
-const dataLocalStorage = localStorage.getItem('formValues');
-
-const dataLocalStorageObjet = JSON.parse(dataLocalStorage);
-
-//Fonction pour que le champs du formulaire soit rempli par les données du local storage
-function fullFormLocalStorage(input) {
-  if (dataLocalStorageObjet == null) {
-    console.log('Le local storage a pour valeur null');
-  } else {
-    document.querySelector(`#${input}`).value = dataLocalStorageObjet[input];
-  }
+  });
 }
-
-fullFormLocalStorage('firstName');
-fullFormLocalStorage('lastName');
-fullFormLocalStorage('address');
-fullFormLocalStorage('city');
-fullFormLocalStorage('email');
