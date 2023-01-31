@@ -11,8 +11,8 @@ let response = fetch('http://localhost:3000/api/products')
 // Affichage des produits
 const productsList = document.getElementById('items');
 
-const renderProducts = (products) => {
-  products.forEach((product) => {
+const renderProducts = (data) => {
+  data.forEach((product) => {
     output += `
          <a href="./product.html?id=${product._id}">
          <article>
