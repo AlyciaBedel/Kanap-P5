@@ -8,7 +8,7 @@ fetch(`http://localhost:3000/api/products/${id}`)
   .then((response) => response.json())
   .then((res) => createDOM(res))
   .catch((error) => {
-    console.log(error);
+    console.log('Je suis une erreur de la requête GET', error);
   });
 
 function createDOM(products) {
@@ -73,13 +73,13 @@ function saveOrder(products) {
       quantity: Number(quantity),
     };
 
-    if (OrderInvalid(color, quantity)) return;
+    if (orderInvalid(color, quantity)) return;
     addProductLocalStorage(optionsProducts, color);
   });
 }
 
 //Fonction qui vérifie si les couleurs et les quantités ne sont pas renseignées ou son égale à 0
-function OrderInvalid(color, quantity) {
+function orderInvalid(color, quantity) {
   //Alerte si la couleur et la quantité ne sont pas renseignée
   if (!color || quantity < 1 || quantity > 100) {
     alert(

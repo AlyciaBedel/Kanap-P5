@@ -73,7 +73,7 @@ function displayCart(cart) {
     )
     .join('');
 
-  //Appelle des différentes fonctions
+  //Appel des différentes fonctions
   getTotal();
   updateQuantityPrice();
   removeFromCart();
@@ -162,14 +162,16 @@ function removeFromCart() {
   });
 }
 
+//Fonction qui soumet le formulaire
 function submitForm(e) {
   e.preventDefault();
 
-  if (IsInvalidForm()) return;
-  if (IsEmailInvalid()) return;
-  if (IsLastNameInvalid()) return;
-  if (IsFirstNameInvalid()) return;
+  // Récupération du formulaire valide
+  const form = requestBody(e);
+  // Si Formulaire invalide : Envoi annulé
+  if (form == null) return;
 
+  //On fait la requête POST avec /order
   const body = requestBody();
   fetch('http://localhost:3000/api/products/order', {
     method: 'POST',
@@ -179,15 +181,28 @@ function submitForm(e) {
     },
   })
     .then((res) => res.json())
-    .then((data) => console.log(data))
+    .then((data) => {
+      alert('Votre commande a bien été effectuée');
+      //On récupère l'id de la commande
+      const orderId = data.orderId;
+
+      //Redirection vers confirmation en récupérant l'id
+      window.location.href = 'confirmation.html' + '?orderId=' + orderId;
+      return console.log(data);
+    })
     .catch((error) => {
       console.log('Je suis une erreur de la requête POST', error);
     });
 }
 
+//Fonction qui vérifie si les champs sont vides
 function IsInvalidForm() {
   const displayFormCart = document.querySelector('.cart');
+
+  //Sélection de tous les inputs
   const inputs = displayFormCart.querySelectorAll('input');
+
+  //Boucle sur chaque input vérifie si le champs est vide ou non
   inputs.forEach((input) => {
     if (input.value === '') {
       alert('Merci de remplir tous les champs du formulaire');
@@ -198,7 +213,8 @@ function IsInvalidForm() {
   });
 }
 
-function requestBody() {
+//Fonction qui récupère les données du formulaire et du local storage
+function requestBody(e) {
   //Récupération des valeurs du formulaire
   const cart = JSON.parse(localStorage.getItem('product'));
   const firstName = document.querySelector('#firstName').value;
@@ -207,39 +223,60 @@ function requestBody() {
   const city = document.querySelector('#city').value;
   const email = document.querySelector('#email').value;
 
-  // if (cart !== null && [firstName, lastName, address, city, email] !== '') {
-  // Récupération des id(s) Produits du Panier
-  const productsIds = [];
-  cart.forEach((optionProduct) => {
-    productsIds.push(optionProduct.id);
-  });
+  // Constante : Appel des fonctions de validation
+  const formValid =
+    IsFirstNameInvalid() &&
+    IsLastNameInvalid() &&
+    IsAddressInvalid() &&
+    IsCityInvalid() &&
+    IsEmailInvalid();
 
-  const form = {
-    contact: {
-      firstName: firstName,
-      lastName: lastName,
-      address: address,
-      city: city,
-      email: email,
-    },
-    products: [productsIds],
-  };
-  console.log(form);
-  return form;
-  // } else {
-  //   alert('Veuillez bien remplir le formulaire et d'avoir un produit dans votre panier');
-  //   e.preventDefault();
-  // }
+  //Si produits dans le panier et champs valides
+  if (
+    cart !== null &&
+    [firstName, lastName, address, city, email] !== '' &&
+    formValid
+  ) {
+    //Création d'un tableau pour stocker l'id produits
+    const productsIds = [];
+
+    //Ajout de l'id de chaque produits dans le tableau
+    cart.forEach((optionProduct) => {
+      productsIds.push(optionProduct.id);
+    });
+
+    //Création objet pour stocker le formulaire
+    const form = {
+      contact: {
+        firstName: firstName,
+        lastName: lastName,
+        address: address,
+        city: city,
+        email: email,
+      },
+      products: productsIds,
+    };
+    return form;
+  } else {
+    alert(
+      "Veuillez bien remplir le formulaire et d'avoir un produit dans votre panier"
+    );
+    e.preventDefault(e);
+  }
 }
 
 //Fonction Prénom pour vérifier la validité du champs avec message d'erreur
 function IsFirstNameInvalid() {
+  //Récupération des éléments dans le DOM
   const firstNameInput = document.getElementById('firstName');
   const firstNameValue = document.getElementById('firstName').value;
   const firstNameErrorMsg = document.getElementById('firstNameErrorMsg');
+
+  //Regex pour l'éléments
   const regex =
     /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/;
 
+  //Si le champ ne correspond pas au regex affichage message d'erreur
   if (regex.test(firstNameValue) == false) {
     firstNameInput.style.backgroundColor = 'red';
     firstNameInput.style.color = 'white';
@@ -255,17 +292,21 @@ function IsFirstNameInvalid() {
 
 //Fonction Nom pour vérifier la validité du champs avec message d'erreur
 function IsLastNameInvalid() {
+  //Récupération des éléments dans le DOM
   const lastNameInput = document.getElementById('lastName');
   const lastNameValue = document.getElementById('lastName').value;
   const lastNameErrorMsg = document.getElementById('lastNameErrorMsg');
+
+  //Regex pour l'éléments
   const regex =
     /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{3,20}$/;
 
+  //Si le champ ne correspond pas au regex affichage message d'erreur
   if (regex.test(lastNameValue) == false) {
     lastNameInput.style.backgroundColor = 'red';
     lastNameInput.style.color = 'white';
     lastNameErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
-                                  - "Prénom" ne doit comporter que des lettres<br>
+                                  - "Nom" ne doit comporter que des lettres<br>
                                   - Tirets et accents sont autorisés`;
     lastNameErrorMsg.style.display = 'inherit';
     return false;
@@ -276,18 +317,21 @@ function IsLastNameInvalid() {
 
 //Fonction Adresse pour vérifier la validité du champs avec message d'erreur
 function IsAddressInvalid() {
+  //Récupération des éléments dans le DOM
   const addressInput = document.getElementById('address');
   const addressValue = document.getElementById('address').value;
   const addressErrorMsg = document.getElementById('addressErrorMsg');
+
+  //Regex pour l'éléments
   const regex =
     /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/;
 
+  //Si le champ ne correspond pas au regex affichage message d'erreur
   if (regex.test(addressValue) == false) {
     addressInput.style.backgroundColor = 'red';
     addressInput.style.color = 'white';
     addressErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
-                                  - "Prénom" ne doit comporter que des lettres<br>
-                                  - Tirets et accents sont autorisés`;
+                                  7 rue du tilleul`;
     addressErrorMsg.style.display = 'inherit';
     return false;
   } else {
@@ -297,18 +341,22 @@ function IsAddressInvalid() {
 
 //Fonction Ville pour vérifier la validité du champs avec message d'erreur
 function IsCityInvalid() {
+  //Récupération des éléments dans le DOM
   const cityInput = document.getElementById('city');
   const cityValue = document.getElementById('city').value;
   const cityErrorMsg = document.getElementById('cityErrorMsg');
+
+  //Regex pour l'éléments
   const regex =
     /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ._\s-]{5,60}$/;
 
-  if (regex.test(cityInput) == false) {
+  //Si le champ ne correspond pas au regex affichage message d'erreur
+  if (regex.test(cityValue) == false) {
     cityInput.style.backgroundColor = 'red';
     cityInput.style.color = 'white';
     cityErrorMsg.innerHTML = `Ce champ est obligatoire :<br>
-                                  - "Prénom" ne doit comporter que des lettres<br>
-                                  - Tirets et accents sont autorisés`;
+                                  - "Ville" ne doit comporter que des lettres, tirets et accents sont autorisés<br>
+                                  - "Code Postal" ne doit comporter que des chiffres`;
     cityErrorMsg.style.display = 'inherit';
     return false;
   } else {
@@ -318,11 +366,15 @@ function IsCityInvalid() {
 
 //Fonction Email pour vérifier la validité du champs avec message d'erreur
 function IsEmailInvalid() {
+  //Récupération des éléments dans le DOM
   const emailInput = document.getElementById('email');
   const emailValue = document.getElementById('email').value;
   const emailErrorMsg = document.getElementById('emailErrorMsg');
+
+  //Regex pour l'éléments
   const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
+  //Si le champ ne correspond pas au regex affichage message d'erreur
   if (regex.test(emailValue) == false) {
     emailInput.style.backgroundColor = 'red';
     emailInput.style.color = 'white';
