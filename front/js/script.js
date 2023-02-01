@@ -5,7 +5,7 @@ let response = fetch('http://localhost:3000/api/products')
   .then((res) => res.json())
   .then((data) => renderProducts(data))
   .catch((error) => {
-    console.log("Je suis une erreur de la requête GET", error);
+    console.log('Je suis une erreur de la requête GET', error);
   });
 
 // Affichage des produits

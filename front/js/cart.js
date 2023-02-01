@@ -127,10 +127,11 @@ function updateQuantityPrice() {
 
 //Fonction pour supprimer un élément du panier
 function removeFromCart() {
-  const deleteButtons = document.querySelectorAll('.cart__item .deleteItem');
+  const deleteButtons = document.querySelectorAll('.deleteItem');
   // On fait une boucle sur tous les boutons de suppression en écoutant l'événement au clique
   deleteButtons.forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
       // Récupérer les produits du panier dans le Local Storage et en les mettant en JSON
       const cart = JSON.parse(localStorage.getItem('product'));
       // Filtre le panier pour supprimer le produit sur le bouton cliquer
@@ -142,9 +143,7 @@ function removeFromCart() {
       localStorage.setItem('product', JSON.stringify(updatedCart));
 
       // Trouve le produit du panier qui correspond au bouton sur lequel clique
-      const productToDelete = document.querySelector(
-        `.cart__item[data-id="${button.dataset.id}"][data-color="${button.dataset.color}"]`
-      );
+      const productToDelete = button.closest('.cart__item');
 
       // Supprime le produit du panier
       productToDelete.remove();
