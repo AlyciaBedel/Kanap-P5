@@ -81,11 +81,15 @@ function saveOrder(products) {
 
 //Fonction qui vérifie si les couleurs et les quantités ne sont pas renseignées ou son égale à 0
 function orderInvalid(color, quantity) {
-  //Alerte si la couleur et la quantité ne sont pas renseignée
-  if (!color || quantity < 1 || quantity > 100) {
-    alert(
-      'Merci de sélectionner une couleur et une quantité comprise entre 1 et 100'
-    );
+  //Alerte si la couleur n'est pas renseignée
+  if (!color) {
+    alert('Merci de sélectionner une couleur');
+    return true;
+  }
+
+  //Alerte si la quantité n'est pas renseignée
+  if (quantity < 1 || quantity > 100) {
+    alert('Merci de sélectionner une quantité comprise entre 1 et 100');
     return true;
   }
 }
