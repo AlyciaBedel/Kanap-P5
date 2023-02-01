@@ -285,6 +285,10 @@ function IsFirstNameInvalid() {
     firstNameErrorMsg.style.display = 'inherit';
     return false;
   } else {
+    firstNameInput.style.backgroundColor = 'white';
+    firstNameInput.style.color = 'black';
+    firstNameErrorMsg.innerHTML = ``;
+    firstNameErrorMsg.style.display = 'none';
     return true;
   }
 }
@@ -310,6 +314,10 @@ function IsLastNameInvalid() {
     lastNameErrorMsg.style.display = 'inherit';
     return false;
   } else {
+    lastNameInput.style.backgroundColor = 'white';
+    lastNameInput.style.color = 'black';
+    lastNameErrorMsg.innerHTML = ``;
+    lastNameErrorMsg.style.display = 'none';
     return true;
   }
 }
@@ -334,6 +342,10 @@ function IsAddressInvalid() {
     addressErrorMsg.style.display = 'inherit';
     return false;
   } else {
+    addressInput.style.backgroundColor = 'white';
+    addressInput.style.color = 'black';
+    addressErrorMsg.innerHTML = ``;
+    addressErrorMsg.style.display = 'none';
     return true;
   }
 }
@@ -359,6 +371,10 @@ function IsCityInvalid() {
     cityErrorMsg.style.display = 'inherit';
     return false;
   } else {
+    cityInput.style.backgroundColor = 'white';
+    cityInput.style.color = 'black';
+    cityErrorMsg.innerHTML = ``;
+    cityErrorMsg.style.display = 'none';
     return true;
   }
 }
@@ -382,6 +398,10 @@ function IsEmailInvalid() {
     emailErrorMsg.style.display = 'inherit';
     return false;
   } else {
+    emailInput.style.backgroundColor = 'white';
+    emailInput.style.color = 'black';
+    emailErrorMsg.innerHTML = ``;
+    emailErrorMsg.style.display = 'none';
     return true;
   }
 }
