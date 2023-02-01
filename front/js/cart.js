@@ -76,7 +76,7 @@ function displayCart(cart) {
   //Appel des différentes fonctions
   getTotal();
   updateQuantityPrice();
-  removeFromCart();
+  deleteToCart();
 }
 
 //Fonction pour calculer le total du panier + de la quantité
@@ -126,7 +126,7 @@ function updateQuantityPrice() {
 }
 
 //Fonction pour supprimer un élément du panier
-function removeFromCart() {
+function deleteToCart() {
   const deleteButtons = document.querySelectorAll('.deleteItem');
   // On fait une boucle sur tous les boutons de suppression en écoutant l'événement au clique
   deleteButtons.forEach((button) => {
@@ -186,7 +186,7 @@ function submitForm(e) {
       const orderId = data.orderId;
 
       //Redirection vers confirmation en récupérant l'id
-      window.location.href = 'confirmation.html' + '?orderId=' + orderId;
+      window.location.href = `confirmation.html?orderId=${orderId}`;
       return console.log(data);
     })
     .catch((error) => {

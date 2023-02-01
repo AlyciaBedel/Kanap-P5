@@ -11,6 +11,7 @@ fetch(`http://localhost:3000/api/products/${id}`)
     console.log('Je suis une erreur de la requête GET', error);
   });
 
+//Fonction qui va crée le DOM du produit
 function createDOM(products) {
   //Récupération des éléments HTML
   const imageProduct = document.getElementsByClassName('item__img');

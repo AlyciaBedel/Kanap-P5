@@ -8,9 +8,9 @@ let response = fetch('http://localhost:3000/api/products')
     console.log('Je suis une erreur de la requête GET', error);
   });
 
-// Affichage des produits
 const productsList = document.getElementById('items');
 
+// Affichage des produits
 const renderProducts = (data) => {
   data.forEach((product) => {
     output += `
