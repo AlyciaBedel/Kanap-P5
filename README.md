@@ -9,8 +9,8 @@ Cinquième projet du parcours "Développeur web" chez OpenClassroom. L'objectif 
 Kanap est une marque de canapés qui vend ses produits depuis sa boutique exclusivement. Aujourd’hui, celle-ci souhaiterait avoir une plateforme de e-commerce en plus de sa boutique physique pour vendre ses produits sur Internet.
 
 ## Objectifs
-- Unifier les travaux déjà réalisés (Back-End et Front-End) en intégrant dynamiquement les éléments de l'API dans les différentes pages web avec JavaScript.
-- Mettre en place un plan de test d'acceptation.
+1. Unifier les travaux déjà réalisés (Back-End et Front-End) en intégrant dynamiquement les éléments de l'API dans les différentes pages web avec JavaScript.
+2. Mettre en place un plan de test d'acceptation.
 
 ## Architecture et informations générales
 ### Page d'accueil
