@@ -33,5 +33,16 @@ Un tests d'acceptation a été réalisé sur les différentes pages en couvrant 
 <a href="https://github.com/AlyciaBedel/Kanap-P5/files/10697213/Bedel_Alycia_2_plan_test_012023.pdf">Voir le tests d'acceptation</a> 
 
 ## Installation du projet
+`Node` et `npm` doivent être installés localement sur votre machine.\
+Installez toutes les dépendances avec npm.
 
+Ouvrez le répertoire `back` depuis le terminal, puis :
+```terminal
+npm install
+```
+
+Pour lancer le server :
+```terminal
+node server
+```
 
