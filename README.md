@@ -36,7 +36,7 @@ Un tests d'acceptation a été réalisé sur les différentes pages en couvrant 
 `Node` et `npm` doivent être installés localement sur votre machine.\
 Installez toutes les dépendances avec npm.
 
-Ouvrez le répertoire `back` depuis le terminal, puis installer :
+Ouvrez le répertoire `back` depuis le terminal :
 ```terminal
 npm install
 ```
