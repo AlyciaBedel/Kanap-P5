@@ -26,3 +26,12 @@ L’utilisateur aura la possibilité de supprimer un produit de son panier, le p
 
 ### Page de confirmation
 Un message de confirmation de commande, remerciant l'utilisateur pour sa commande, et indiquant l'identifiant de commande envoyé par l’API. L'utilisateur voit alors s’afficher son numéro de commande. Il faut veiller à ce que ce numéro ne soit stocké nulle part.
+
+## Planification de tests
+Un tests d'acceptation a été réalisé sur les différentes pages en couvrant l’ensemble des fonctionnalités listées dans le document <a href="https://github.com/AlyciaBedel/Kanap-P5/files/10697217/DW%2BP5%2B-%2BSpecifications%2Bfonctionnelles.pdf">(spécifications fonctionnelles et techniques Kanap)</a>.
+
+<a href="https://github.com/AlyciaBedel/Kanap-P5/files/10697213/Bedel_Alycia_2_plan_test_012023.pdf">Voir le tests d'acceptation</a> 
+
+## Installation du projet
+
+
