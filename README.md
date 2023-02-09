@@ -12,17 +12,17 @@ Kanap est une marque de canapés qui vend ses produits depuis sa boutique exclus
 - Unifier les travaux déjà réalisés (Back-End et Front-End) en intégrant dynamiquement les éléments de l'API dans les différentes pages web avec JavaScript.
 - Mettre en place un plan de test d'acceptation.
 
-## Architecture générale
+## Architecture et informations générales
 ### Page d'accueil
-Une page d’accueil montrant de manière dynamique tous les articles disponibles à la vente.
+La page d’accueil affiche de manière dynamique tous les produits disponibles à la vente retournés par l’API. Pour chaque produit, on affiche l’image de celui-ci, ainsi que son nom et le début de sa description. En cliquant sur le produit, l’utilisateur sera redirigé sur la page du produit pour consulter
+celui-ci plus en détail.
 
 ### Page produit
-La page produit affiche de manière dynamique les détails du produit sur lequel l'utilisateur a cliqué depuis la page d’accueil. Depuis cette page, l’utilisateur peut sélectionner une quantité, une couleur, et ajouter le produit à son panier.
+Cette page s'affiche de manière dynamique avec les détails du produit sur lequel l'utilisateur a cliqué depuis la page d'accueil. La page présente un seul produit ; elle possède un menu déroulant permettant à l'utilisateur de choisir une option de personnalisation pour la couleur, ainsi qu’un input pour saisir la quantité. L'utilisateur peut ajouter le produit à son panier et les éléments sont pris en compte dans le panier.
 
 ### Page panier
-Celle-ci contient plusieurs parties :
-○ Un résumé des produits dans le panier, le prix total et la possibilité de modifier la quantité d’un produit sélectionné ou bien de supprimer celui-ci.
-○ Un formulaire permettant de passer une commande. Les données du formulaire doivent être correctes et bien formatées avant d'être renvoyées au back-end. 
+Sur cette page, on va retrouver un résumé des produits dans le panier, le prix total et la possibilité de modifier la quantité d’un produit sélectionné ou bien de supprimer celui-ci. Un formulaire permettant de passer une commande. Les données du formulaire doivent être correctes et bien formatées avant d'être renvoyées au back-end. Lorsque l’utilisateur va modifier la quantité d’un produit dans son panier, le total du panier devra se mettre à jour.
+L’utilisateur aura la possibilité de supprimer un produit de son panier, le produit devra disparaître de la page. Les inputs des utilisateurs doivent être analysés et validés pour vérifier le format et le type de données avant l’envoi à l’API. En cas de problème de saisie, un message d’erreur va s'afficher en dessous du champ correspondant. On ne stockera pas le prix des articles en local. 
 
 ### Page de confirmation
-Un message de confirmation de commande, remerciant l'utilisateur pour sa commande, et indiquant l'identifiant de commande envoyé par l’API.
+Un message de confirmation de commande, remerciant l'utilisateur pour sa commande, et indiquant l'identifiant de commande envoyé par l’API. L'utilisateur voit alors s’afficher son numéro de commande. Il faut veiller à ce que ce numéro ne soit stocké nulle part.
