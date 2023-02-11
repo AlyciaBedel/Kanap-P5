@@ -127,36 +127,40 @@ function updateQuantityPrice() {
 
 //Fonction pour supprimer un élément du panier
 function deleteToCart() {
-  const deleteButtons = document.querySelectorAll('.deleteItem');
-  // On fait une boucle sur tous les boutons de suppression en écoutant l'événement au clique
-  deleteButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Récupérer les produits du panier dans le Local Storage et en les mettant en JSON
+  const deleteButtons = document.querySelectorAll('.cart__item .deleteItem');
+
+  //On fait une boucle sur tous les boutons de suppression en écoutant l'événement au clique
+  deleteButtons.forEach((products) => {
+    products.addEventListener('click', () => {
+      //Récupération de l'article qui correspond au produit à supprimer
+      const displayToDelete = products.closest('article');
+      //Récupérer les produits du panier dans le localStorage
       const cart = JSON.parse(localStorage.getItem('product'));
-      // Filtre le panier pour supprimer le produit sur le bouton cliquer
-      const updatedCart = cart.filter(
-        (item) =>
-          item.id !== button.dataset.id && item.color !== button.dataset.color
+      //Recherche de l'index du produit dans le panier
+      const productIndex = cart.findIndex(
+        (product) =>
+          product.id === displayToDelete.dataset.id &&
+          product.color === displayToDelete.dataset.color
       );
-      // Enregistrer le panier mis à jour dans le Local Storage
-      localStorage.setItem('product', JSON.stringify(updatedCart));
 
-      // Trouve le produit du panier qui correspond au bouton sur lequel clique
-      const productToDelete = button.closest('.cart__item');
+      //Suppression du produit
+      if (productIndex >= 0) {
+        cart.splice(productIndex, 1);
+        //Enregistre le panier mis à jour dans le local Storage
+        localStorage.setItem('product', JSON.stringify(cart));
 
-      // Supprime le produit du panier
-      productToDelete.remove();
+        //Supprime le produit du panier
+        displayToDelete.remove();
 
-      if (updatedCart.length === 0) {
-        //Nettoyer le local storage
-        localStorage.clear();
-
-        document.querySelector('#totalQuantity').innerHTML = '0';
-        document.querySelector('#totalPrice').innerHTML = '0';
-        document.querySelector('h1').innerHTML = 'Votre panier est vide';
+        if (cart.length === 0) {
+          //Nettoyer le local storage
+          window.localStorage.clear();
+          document.querySelector('#totalQuantity').innerHTML = '0';
+          document.querySelector('#totalPrice').innerHTML = '0';
+          document.querySelector('h1').innerHTML = 'Votre panier est vide';
+        }
+        getTotal();
       }
-      getTotal();
     });
   });
 }
